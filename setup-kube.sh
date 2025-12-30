@@ -23,5 +23,10 @@ if [ $? -eq 0 ]; then
     echo "Testing connection..."
     kubectl get nodes
 else
-    echo "Error: Could not fetch config from S3. Ensure your AWS CLI is configured and the bucket name is correct."
+    echo "--------------------------------------------------------------------------------"
+    echo "Error: Could not fetch config from S3."
+    echo "This usually means the AWS instance is still booting (takes ~2-3 minutes)."
+    echo "Please wait a moment and try running this script again."
+    echo "--------------------------------------------------------------------------------"
+    echo "Bucket: $BUCKET_NAME"
 fi

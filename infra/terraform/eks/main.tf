@@ -121,6 +121,16 @@ locals {
     curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644 --tls-san $PUBLIC_IP
     export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
+    # Prepare and Upload kubeconfig for remote access (Early)
+    # Detect Public IP for K3s SSL
+    PUBLIC_IP=$(curl -s ifconfig.me)
+    cp /etc/rancher/k3s/k3s.yaml /tmp/kubeconfig
+    sed -i "s/127.0.0.1/$PUBLIC_IP/g" /tmp/kubeconfig
+    
+    # Upload to S3 (requires aws-cli)
+    apt-get install -y awscli
+    aws s3 cp /tmp/kubeconfig s3://${var.tf_state_bucket}/dev/kubeconfig
+
     # Wait for nodes to be ready
     while ! kubectl get nodes | grep -q "Ready"; do sleep 5; done
 
@@ -151,13 +161,6 @@ locals {
         automated:
           prune: true
           selfHeal: true
-    # Prepare kubeconfig for remote access
-    cp /etc/rancher/k3s/k3s.yaml /tmp/kubeconfig
-    sed -i "s/127.0.0.1/$PUBLIC_IP/g" /tmp/kubeconfig
-    
-    # Upload to S3 (requires aws-cli)
-    apt-get install -y awscli
-    aws s3 cp /tmp/kubeconfig s3://${var.tf_state_bucket}/dev/kubeconfig
     EOF
   EOT
 }

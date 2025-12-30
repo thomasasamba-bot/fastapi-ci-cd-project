@@ -1,8 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
 from typing import Optional
 import os
 import logging
+import prometheus_client
+from prometheus_client import Counter
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -69,7 +71,7 @@ async def list_users(active: Optional[bool] = None):
 
 @app.get("/metrics")
 def metrics():
-    return Response(prometheus_client.generate_latest() 
+    return Response(prometheus_client.generate_latest(), media_type="text/plain")
 
 if __name__ == "__main__":
     import uvicorn

@@ -37,7 +37,7 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
       - name: Run Security Scan (Bandit)
-        run: bandit -r ./app -f custom
+        run: bandit -r ./app -x ./app/tests
 
       - name: Run Tests
         run: |

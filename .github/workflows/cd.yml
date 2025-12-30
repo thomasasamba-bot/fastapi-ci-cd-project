@@ -86,6 +86,9 @@ jobs:
           EOF
           terraform init -backend-config=backend.tfbackend
 
-      - name: Terraform Destroy
+      - name: Terraform Destroy (Delayed 30m)
         working-directory: infra/terraform/eks
-        run: terraform destroy -auto-approve
+        run: |
+          echo "Waiting 30 minutes before destroying resources to allow for verification..."
+          sleep 1800
+          terraform destroy -auto-approve

@@ -33,10 +33,12 @@ jobs:
       - name: Terraform Initialize
         working-directory: infra/terraform/eks
         run: |
-          terraform init \
-            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
-            -backend-config="key=terraform.tfstate" \
-            -backend-config="region=us-east-1"
+          cat <<EOF > backend.tfbackend
+          bucket = "${{ secrets.TF_STATE_BUCKET }}"
+          key    = "terraform.tfstate"
+          region = "us-east-1"
+          EOF
+          terraform init -backend-config=backend.tfbackend
 
       - name: Terraform Apply Infrastructure
         working-directory: infra/terraform/eks

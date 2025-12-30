@@ -37,5 +37,5 @@ variable "public_subnets" {
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t3.micro" # Free tier eligible
+  default     = "m7i-flex.large" # Free tier eligible
 }

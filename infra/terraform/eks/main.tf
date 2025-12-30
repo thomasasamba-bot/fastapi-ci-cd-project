@@ -21,6 +21,19 @@ provider "aws" {
 # ---------------------------------------------------------------------------------------------------------------------
 data "aws_caller_identity" "current" {}
 
+# Use the Default VPC
+data "aws_vpc" "default" {
+  default = true
+}
+
+# Get subnets from the Default VPC
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
 # Get the latest Ubuntu 22.04 AMI
 data "aws_ami" "ubuntu" {
   most_recent = true
@@ -38,45 +51,19 @@ data "aws_ami" "ubuntu" {
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
-# NETWORKING (VPC)
-# ---------------------------------------------------------------------------------------------------------------------
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 5.0"
-
-  name = "${var.project_name}-vpc"
-  cidr = var.vpc_cidr
-
-  azs             = var.availability_zones
-  private_subnets = [] # No private subnets to save NAT Gateway costs
-  public_subnets  = var.public_subnets
-
-  enable_nat_gateway = false
-  single_nat_gateway = false
-  
-  map_public_ip_on_launch = true
-
-  tags = {
-    Terraform   = "true"
-    Environment = var.environment
-    Project     = var.project_name
-  }
-}
-
-# ---------------------------------------------------------------------------------------------------------------------
 # SECURITY GROUPS
 # ---------------------------------------------------------------------------------------------------------------------
 resource "aws_security_group" "k3s_node" {
   name        = "${var.project_name}-k3s-sg"
   description = "Security group for K3s node"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = data.aws_vpc.default.id
 
   # SSH Access
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Warning: Restrict this in production
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   # HTTP/HTTPS Access (Traefik Ingress)
@@ -87,6 +74,7 @@ resource "aws_security_group" "k3s_node" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # ArgoCD UI (Initial port)
   ingress {
     from_port   = 443
     to_port     = 443
@@ -94,22 +82,14 @@ resource "aws_security_group" "k3s_node" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # K8s API Access (Optional, for remote kubectl)
+  # K8s API Access
   ingress {
     from_port   = 6443
     to_port     = 6443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Warning: Restrict this in production
-  }
-  
-  # NodePort Range (for testing services directly if needed)
-  ingress {
-    from_port   = 30000
-    to_port     = 32767
-    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
+  
   # Outbound Access
   egress {
     from_port   = 0
@@ -122,37 +102,62 @@ resource "aws_security_group" "k3s_node" {
 # ---------------------------------------------------------------------------------------------------------------------
 # COMPUTE (EC2 K3s Node)
 # ---------------------------------------------------------------------------------------------------------------------
-# User Data script to install K3s
 locals {
   user_data = <<-EOT
     #!/bin/bash
     # Update system
     apt-get update && apt-get upgrade -y
+    apt-get install -y curl jq
     
-    # Install K3s (Lightweight Kubernetes)
-    # We disable Traefik here if we want to install it manually, but for simplicity we keep it.
-    # We allow writing kubeconfig with mode 644 for easy download (Warning: Security risk, dev only)
+    # Install K3s
     curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
+    export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
-    # Install Helm
-    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+    # Wait for nodes to be ready
+    while ! kubectl get nodes | grep -q "Ready"; do sleep 5; done
+
+    # Install ArgoCD
+    kubectl create namespace argocd || true
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+    # Wait for ArgoCD server to be ready
+    while ! kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server | grep -q "Running"; do sleep 10; done
+
+    # Apply the Application manifest
+    cat <<EOF | kubectl apply -f -
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: fastapi-app
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: "https://github.com/thomasasamba-bot/fastapi-ci-cd-project.git"
+        targetRevision: HEAD
+        path: infra/kubernetes/app
+      destination:
+        server: "https://kubernetes.default.svc"
+        namespace: default
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+    EOF
   EOT
 }
 
 resource "aws_instance" "k3s_node" {
   ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type # t3.micro (free tier)
+  instance_type = var.instance_type
 
-  subnet_id                   = module.vpc.public_subnets[0]
+  subnet_id                   = data.aws_subnets.default.ids[0]
   vpc_security_group_ids      = [aws_security_group.k3s_node.id]
   associate_public_ip_address = true
-  
-  # IAM Role (for potential SSM access or S3 access)
-  iam_instance_profile = aws_iam_instance_profile.k3s_node_profile.name
+  iam_instance_profile        = aws_iam_instance_profile.k3s_node_profile.name
 
   user_data = base64encode(local.user_data)
   
-  # Root block device - 20GB is free tier eligible (up to 30GB total)
   root_block_device {
     volume_size = 20
     volume_type = "gp3"

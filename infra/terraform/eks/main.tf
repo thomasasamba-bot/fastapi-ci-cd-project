@@ -113,8 +113,12 @@ locals {
     apt-get update && apt-get upgrade -y
     apt-get install -y curl jq
     
-    # Install K3s
-    curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
+    # Detect Public IP for K3s SSL
+    PUBLIC_IP=$(curl -s ifconfig.me)
+    echo "Public IP detected for K3s: $PUBLIC_IP"
+
+    # Install K3s with TLS SAN
+    curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644 --tls-san $PUBLIC_IP
     export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
     # Wait for nodes to be ready

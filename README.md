@@ -77,27 +77,19 @@ Simply push your changes to the `main` branch. The GitHub Actions pipeline will:
 
 ## 🔍 How to Access & Observe
 
-### 1. The FastAPI Application
-Once the deployment job finishes, get the **Public IP** of your EC2 instance from the AWS Console or Terraform outputs.
-- **Home Endpoint**: `http://<PUBLIC_IP>/`
+### 1. Zero-Config Web Access
+No `kubectl` required! Once the deployment finishes, use your **Public IP**:
+- **FastAPI App**: `http://<PUBLIC_IP>/`
 - **Swagger Docs**: `http://<PUBLIC_IP>/docs`
+- **Prometheus**: `http://<PUBLIC_IP>/prometheus`
+- **Grafana**: `http://<PUBLIC_IP>/grafana` (admin/admin)
 
-### 2. Observability Stack (Prometheus & Grafana)
-Observability is baked into the cluster! To access these internal tools, use **Port Forwarding**.
+### 2. Remote CLI Access (kubectl)
+I've provided a script to automatically link your local machine to the AWS cluster:
+1. Run: `chmod +x setup-kube.sh`
+2. Run: `./setup-kube.sh <PUBLIC_IP>`
 
-#### **Prometheus (Metrics Collection)**
-Monitor raw metrics and query your system's health.
-1. Run: `kubectl port-forward svc/prometheus-service 9090:9090 -n monitoring`
-2. Access: `http://localhost:9090`
-
-#### **Grafana (Visualization)**
-Beautiful dashboards for infrastructure monitoring.
-1. Run: `kubectl port-forward svc/grafana-service 3000:3000 -n monitoring`
-2. Access: `http://localhost:3000`
-3. Credentials: `admin` / `admin`
-
-> [!NOTE]
-> Resource requests and limits have been specifically tuned for this cluster to ensure the monitoring stack remains stable on a single node without causing resource starvation.
+This will download the credentials, fix the IP, and verify the connection. You can then run any `kubectl` command locally.
 
 ## 📈 Portfolio Highlights
 This project serves as a comprehensive demonstration of:

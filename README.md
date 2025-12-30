@@ -75,6 +75,30 @@ Simply push your changes to the `main` branch. The GitHub Actions pipeline will:
 2. Update the infrastructure via Terraform.
 3. Update the Kubernetes manifests, triggering an ArgoCD sync.
 
+## 🔍 How to Access & Observe
+
+### 1. The FastAPI Application
+Once the deployment job finishes, get the **Public IP** of your EC2 instance from the AWS Console or Terraform outputs.
+- **Home Endpoint**: `http://<PUBLIC_IP>/`
+- **Swagger Docs**: `http://<PUBLIC_IP>/docs`
+
+### 2. Observability Stack (Prometheus & Grafana)
+Observability is baked into the cluster! To access these internal tools, use **Port Forwarding**.
+
+#### **Prometheus (Metrics Collection)**
+Monitor raw metrics and query your system's health.
+1. Run: `kubectl port-forward svc/prometheus-service 9090:9090 -n monitoring`
+2. Access: `http://localhost:9090`
+
+#### **Grafana (Visualization)**
+Beautiful dashboards for infrastructure monitoring.
+1. Run: `kubectl port-forward svc/grafana-service 3000:3000 -n monitoring`
+2. Access: `http://localhost:3000`
+3. Credentials: `admin` / `admin`
+
+> [!NOTE]
+> Resource requests and limits have been specifically tuned for this cluster to ensure the monitoring stack remains stable on a single node without causing resource starvation.
+
 ## 📈 Portfolio Highlights
 This project serves as a comprehensive demonstration of:
 - **Automation First** mindset.

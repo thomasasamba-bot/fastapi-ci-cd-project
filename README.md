@@ -4,7 +4,12 @@ This project demonstrates a production-grade **End-to-End DevOps Pipeline** for 
 
 ## 🚀 Architecture Overview
 
+![DevOps Architecture Diagram](docs/assets/architecture.png)
+
 The system is built on a highly automated architecture that ensures stability, security, and scalability.
+
+<details>
+<summary>View Mermaid Logic Diagram</summary>
 
 ```mermaid
 graph TD
@@ -20,6 +25,7 @@ graph TD
     J -->|Deploys| K[FastAPI App]
     K -->|Monitored by| L[Prometheus & Grafana]
 ```
+</details>
 
 ## 🛠️ Key DevOps Skills & Technologies
 

@@ -11,7 +11,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: "https://github.com/thomasasamba/fastapi-ci-cd-project.git" # Placeholder, user needs to update
+    repoURL: "https://github.com/thomasasamba-bot/fastapi-ci-cd-project.git"
     targetRevision: HEAD
     path: infra/kubernetes/app
   destination:

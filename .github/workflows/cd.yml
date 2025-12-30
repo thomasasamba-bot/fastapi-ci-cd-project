@@ -26,11 +26,11 @@ jobs:
       - name: Update k8s manifests with new image
         run: |
           # Update image tag in deployment.yaml
-          sed -i "s|image:.*|image: ${{ secrets.DOCKER_USERNAME }}/webapp:latest|g" infra/kubernetes/base/fastapi-deployment.yaml
+          sed -i "s|image:.*|image: ${{ secrets.DOCKER_USERNAME }}/webapp:latest|g" infra/kubernetes/app/deployment.yaml
 
           # Commit and push changes
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add infra/kubernetes/base/fastapi-deployment.yaml
+          git add infra/kubernetes/app/deployment.yaml
           git commit -m "Update image to latest version [skip ci]"
           git push origin main

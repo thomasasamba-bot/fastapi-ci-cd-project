@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: fastapi-app
-          image: thomasasamba/webapp:latest
+          image: thomasasamba/fastapi-app:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8000

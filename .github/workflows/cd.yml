@@ -42,7 +42,7 @@ jobs:
 
       - name: Terraform Apply Infrastructure
         working-directory: infra/terraform/eks
-        run: terraform apply -auto-approve
+        run: terraform apply -var="tf_state_bucket=${{ secrets.TF_STATE_BUCKET }}" -auto-approve
 
       - name: Deploy Application (Update GitOps Manifests)
         run: |
@@ -95,4 +95,4 @@ jobs:
         run: |
           echo "Waiting 30 minutes before destroying resources to allow for verification..."
           sleep 1800
-          terraform destroy -auto-approve
+          terraform destroy -var="tf_state_bucket=${{ secrets.TF_STATE_BUCKET }}" -auto-approve

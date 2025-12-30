@@ -1,29 +1,27 @@
 #!/bin/bash
-# setup-kube.sh - Automatically configures local kubectl for the showcase project
+# setup-kube.sh - Automatically configures local kubectl via S3 (Zero-SSH)
 
 if [ -z "$1" ]; then
-    echo "Usage: ./setup-kube.sh <PUBLIC_IP>"
+    echo "Usage: ./setup-kube.sh <PUBLIC_IP> [BUCKET_NAME]"
     exit 1
 fi
 
 PUBLIC_IP=$1
+BUCKET_NAME=${2:-"fastapi-ci-cd-state-bucket"} # Default or provided
 
-echo "Fetching K3s config from $PUBLIC_IP..."
+echo "Fetching K3s config from S3 bucket: $BUCKET_NAME..."
 # Backup existing config
 if [ -f ~/.kube/config ]; then
     cp ~/.kube/config ~/.kube/config.bak.$(date +%Y%m%d%H%M%S)
 fi
 
-scp -o StrictHostKeyChecking=no ubuntu@$PUBLIC_IP:/etc/rancher/k3s/k3s.yaml ~/.kube/config
+# Fetch from S3
+aws s3 cp s3://$BUCKET_NAME/dev/kubeconfig ~/.kube/config
 
-echo "Updating config with Public IP..."
-# Support for both macOS and Linux sed
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    sed -i '' "s/127.0.0.1/$PUBLIC_IP/g" ~/.kube/config
+if [ $? -eq 0 ]; then
+    echo "Success! Your local kubectl is now linked to the AWS cluster."
+    echo "Testing connection..."
+    kubectl get nodes
 else
-    sed -i "s/127.0.0.1/$PUBLIC_IP/g" ~/.kube/config
+    echo "Error: Could not fetch config from S3. Ensure your AWS CLI is configured and the bucket name is correct."
 fi
-
-echo "Success! Your local kubectl is now linked to the AWS cluster."
-echo "Testing connection..."
-kubectl get nodes

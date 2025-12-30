@@ -151,6 +151,13 @@ locals {
         automated:
           prune: true
           selfHeal: true
+    # Prepare kubeconfig for remote access
+    cp /etc/rancher/k3s/k3s.yaml /tmp/kubeconfig
+    sed -i "s/127.0.0.1/$PUBLIC_IP/g" /tmp/kubeconfig
+    
+    # Upload to S3 (requires aws-cli)
+    apt-get install -y awscli
+    aws s3 cp /tmp/kubeconfig s3://${var.tf_state_bucket}/dev/kubeconfig
     EOF
   EOT
 }
@@ -205,6 +212,25 @@ resource "aws_iam_role_policy_attachment" "ssm_policy" {
 resource "aws_iam_instance_profile" "k3s_node_profile" {
   name = "${var.project_name}-k3s-profile"
   role = aws_iam_role.k3s_node_role.name
+}
+
+resource "aws_iam_role_policy" "s3_access" {
+  name = "${var.project_name}-s3-access"
+  role = aws_iam_role.k3s_node_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:s3:::${var.tf_state_bucket}/*"
+      }
+    ]
+  })
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

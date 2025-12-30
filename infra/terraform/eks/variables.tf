@@ -16,6 +16,11 @@ variable "environment" {
   default     = "dev"
 }
 
+variable "tf_state_bucket" {
+  description = "The S3 bucket used for Terraform state and kubeconfig sharing"
+  type        = string
+}
+
 variable "vpc_cidr" {
   description = "CIDR block for VPC"
   type        = string

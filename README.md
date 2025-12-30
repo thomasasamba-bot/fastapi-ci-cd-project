@@ -85,11 +85,11 @@ No `kubectl` required! Once the deployment finishes, use your **Public IP**:
 - **Grafana**: `http://<PUBLIC_IP>/grafana` (admin/admin)
 
 ### 2. Remote CLI Access (kubectl)
-I've provided a script to automatically link your local machine to the AWS cluster:
+I've provided a **Zero-SSH** script to link your local machine to the AWS cluster:
 1. Run: `chmod +x setup-kube.sh`
-2. Run: `./setup-kube.sh <PUBLIC_IP>`
+2. Run: `./setup-kube.sh <PUBLIC_IP> <TF_STATE_BUCKET_NAME>`
 
-This will download the credentials, fix the IP, and verify the connection. You can then run any `kubectl` command locally.
+This method uses the **AWS CLI** to securely fetch the configuration from S3, eliminating the need for SSH keys or manual configuration.
 
 ## 📈 Portfolio Highlights
 This project serves as a comprehensive demonstration of:

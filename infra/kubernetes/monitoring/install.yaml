@@ -32,10 +32,10 @@ spec:
             - containerPort: 9090
           resources:
             limits:
-              memory: "256Mi" # Very tight limit
+              memory: "512Mi" # Very tight limit
               cpu: "200m"
             requests:
-              memory: "128Mi"
+              memory: "256Mi"
               cpu: "100m"
           volumeMounts:
             - name: config-volume
@@ -124,6 +124,7 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
+  ingressClassName: traefik
   rules:
     - http:
         paths:

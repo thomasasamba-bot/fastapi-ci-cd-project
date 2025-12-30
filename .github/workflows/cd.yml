@@ -54,7 +54,7 @@ jobs:
             git config user.name "GitHub Actions Bot"
             git config user.email "actions@github.com"
             git add infra/kubernetes/app/deployment.yaml
-            git commit -m "chore: update app image to latest [skip ci]"
+            git commit -m "chore: update app image to latest [skip CI]"
             git push origin main
           else
             echo "No changes to deployment manifest. Skipping commit."
@@ -90,9 +90,9 @@ jobs:
           EOF
           terraform init -backend-config=backend.tfbackend
 
-      - name: Terraform Destroy (Delayed 30m)
+      - name: Terraform Destroy (Delayed 10m)
         working-directory: infra/terraform/eks
         run: |
-          echo "Waiting 30 minutes before destroying resources to allow for verification..."
-          sleep 1800
+          echo "Waiting 10 minutes before destroying resources to allow for verification..."
+          sleep 600
           terraform destroy -var="tf_state_bucket=${{ secrets.TF_STATE_BUCKET }}" -auto-approve

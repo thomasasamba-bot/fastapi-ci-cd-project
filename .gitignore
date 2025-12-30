@@ -5,6 +5,7 @@
 .terraform.lock.hcl
 terraform.tfvars
 terraform.tfvars.json
+*.tfbackend
 
 # Terraform providers (LARGE BINARIES)
 **/providers/

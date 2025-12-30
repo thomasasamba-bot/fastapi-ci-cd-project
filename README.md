@@ -77,8 +77,8 @@ Simply push your changes to the `main` branch. The GitHub Actions pipeline will:
 
 ## 🔍 How to Access & Observe
 
-### 1. Zero-Config Web Access
-No `kubectl` required! Once the deployment finishes, use your **Public IP**:
+### 1. Web Access
+Once the deployment finishes, use your **Public IP**:
 - **FastAPI App**: `http://<PUBLIC_IP>/`
 - **Swagger Docs**: `http://<PUBLIC_IP>/docs`
 - **Prometheus**: `http://<PUBLIC_IP>/prometheus`

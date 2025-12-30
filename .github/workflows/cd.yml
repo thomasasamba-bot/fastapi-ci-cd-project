@@ -25,10 +25,21 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        working-directory: infra/terraform/eks
+        run: terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" -backend-config="key=terraform.tfstate"
+
+      - name: Terraform Apply
+        working-directory: infra/terraform/eks
+        run: terraform apply -auto-approve
+
       - name: Update k8s manifests with new image
         run: |
           # Update image tag in deployment.yaml
-          sed -i "s|image:.*|image: ${{ secrets.DOCKER_USERNAME }}/webapp:latest|g" infra/kubernetes/app/deployment.yaml
+          sed -i "s|image:.*|image: ${{ secrets.DOCKER_USERNAME }}/fastapi-app:latest|g" infra/kubernetes/app/deployment.yaml
 
           # Commit and push changes
           git config user.name "GitHub Actions"

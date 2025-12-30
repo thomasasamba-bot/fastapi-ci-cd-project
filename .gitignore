@@ -1,0 +1,39 @@
+# Terraform - NEVER COMMIT
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+terraform.tfvars
+terraform.tfvars.json
+
+# Terraform providers (LARGE BINARIES)
+**/providers/
+
+# Python
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+
+# Node.js
+node_modules/
+
+# Docker
+.docker/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/

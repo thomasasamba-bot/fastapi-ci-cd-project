@@ -55,3 +55,37 @@ jobs:
           git add infra/kubernetes/app/deployment.yaml
           git commit -m "chore: update app image to latest [skip ci]"
           git push origin main
+
+  cleanup:
+    name: "Automated Resource Cleanup"
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform CLI
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.5.0"
+
+      - name: Terraform Initialize
+        working-directory: infra/terraform/eks
+        run: |
+          cat <<EOF > backend.tfbackend
+          bucket = "${{ secrets.TF_STATE_BUCKET }}"
+          key    = "terraform.tfstate"
+          region = "us-east-1"
+          EOF
+          terraform init -backend-config=backend.tfbackend
+
+      - name: Terraform Destroy
+        working-directory: infra/terraform/eks
+        run: terraform destroy -auto-approve

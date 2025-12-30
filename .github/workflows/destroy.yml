@@ -21,9 +21,15 @@ jobs:
         uses: hashicorp/setup-terraform@v2
 
       - name: Terraform Init
-        run: terraform init -backend-config="bucket=fastapi-cicd-tfstate" -backend-config="key=dev/terraform.tfstate"
         working-directory: infra/terraform/eks
+        run: |
+          cat <<EOF > backend.tfbackend
+          bucket = "${{ secrets.TF_STATE_BUCKET }}"
+          key    = "terraform.tfstate"
+          region = "us-east-1"
+          EOF
+          terraform init -backend-config=backend.tfbackend
 
       - name: Terraform Destroy
-        run: terraform destroy -auto-approve
         working-directory: infra/terraform/eks
+        run: terraform destroy -auto-approve

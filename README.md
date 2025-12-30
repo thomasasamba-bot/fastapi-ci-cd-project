@@ -99,4 +99,4 @@ This project serves as a comprehensive demonstration of:
 - **Cloud-Native** architecture design.
 
 ---
-*Created by [Thomas Asamba](https://github.com/thomasasamba-bot) as a professional DevOps showcase.*
+*Created by [Thomas Asamba](https://github.com/thomasasamba-bot) as a professional DevOps Engineer.*

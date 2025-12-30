@@ -105,6 +105,10 @@ resource "aws_security_group" "k3s_node" {
 locals {
   user_data = <<-EOT
     #!/bin/bash
+    # Log everything to user-data.log for showcase/debugging
+    exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+    
+    echo "Starting post-launch configuration..."
     # Update system
     apt-get update && apt-get upgrade -y
     apt-get install -y curl jq

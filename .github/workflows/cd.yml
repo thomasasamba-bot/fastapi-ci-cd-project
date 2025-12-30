@@ -18,32 +18,38 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Setup Terraform
+      - name: Setup Terraform CLI
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.5.0"
 
-      - name: Terraform Init
+      - name: Terraform Initialize
         working-directory: infra/terraform/eks
-        run: terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" -backend-config="key=terraform.tfstate"
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=terraform.tfstate" \
+            -backend-config="region=us-east-1"
 
-      - name: Terraform Apply
+      - name: Terraform Apply Infrastructure
         working-directory: infra/terraform/eks
         run: terraform apply -auto-approve
 
-      - name: Update k8s manifests with new image
+      - name: Deploy Application (Update GitOps Manifests)
         run: |
-          # Update image tag in deployment.yaml
+          # Use the actual image name consistently
           sed -i "s|image:.*|image: ${{ secrets.DOCKER_USERNAME }}/fastapi-app:latest|g" infra/kubernetes/app/deployment.yaml
 
-          # Commit and push changes
-          git config user.name "GitHub Actions"
+          # Commit changes back to the repo to trigger ArgoCD sync
+          git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add infra/kubernetes/app/deployment.yaml
-          git commit -m "Update image to latest version [skip ci]"
+          git commit -m "chore: update app image to latest [skip ci]"
           git push origin main

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: fastapi-app
-          image: thomasasamba/fastapi-app:latest # User needs to update Docker Hub username
+          image: thomasasamba/webapp:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8000

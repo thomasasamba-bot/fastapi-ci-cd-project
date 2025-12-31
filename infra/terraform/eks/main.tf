@@ -162,6 +162,31 @@ locals {
           prune: true
           selfHeal: true
     EOF
+
+    # Apply the Monitoring Application manifest
+    cat <<EOF | kubectl apply -f -
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: monitoring-stack
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: "https://github.com/thomasasamba-bot/fastapi-ci-cd-project.git"
+        targetRevision: HEAD
+        path: infra/kubernetes/monitoring
+      destination:
+        server: "https://kubernetes.default.svc"
+        namespace: monitoring
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        syncOptions:
+        - CreateNamespace=true
+    EOF
   EOT
 }
 

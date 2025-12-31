@@ -39,7 +39,15 @@ async def metrics_middleware(request, call_next):
 
 @app.get("/")
 async def root():
-    return {"message": "DevOps FastAPI CI/CD is running"}
+    return {
+        "message": "DevOps FastAPI CI/CD is running",
+        "monitoring": {
+            "prometheus": "/prometheus",
+            "grafana": "/grafana",
+            "documentation": "/docs"
+        },
+        "info": "This app is deployed via ArgoCD on a K3s cluster."
+    }
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():

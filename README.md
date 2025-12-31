@@ -7,8 +7,6 @@ An industry-leading demonstration of a **Fully Automated Cloud-Native Lifecycle*
 ## 🏗️ Architecture: The Automated Lifecycle
 This project is engineered to follow a complete **Build → Deploy → Observe → Destroy** cycle, maximizing efficiency and minimizing costs.
 
-![DevOps Architecture Diagram](docs/assets/architecture.png)
-
 ### 🔄 The Workflow Logic
 ```mermaid
 graph LR

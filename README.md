@@ -1,15 +1,16 @@
-# 🚀 Zero-Touch DevOps: End-to-End GitOps Showcase
+# 🚀 Zero-Touch DevOps: End-to-End CI/CD + Security + GitOps in Action
 
-An industry-leading demonstration of a **Fully Automated Cloud-Native Lifecycle**. This project transforms a simple FastAPI application into a robust, secure, and self-healing system deployed on AWS using **Terraform**, **Kubernetes (K3s)**, and **ArgoCD**.
+An industry-leading demonstration of a **Fully Automated Cloud-Native CI/CD + Security + GitOps workflow**. This project transforms a simple FastAPI application into a robust, secure, and self-healing system deployed on AWS using **Terraform**, **Kubernetes (K3s)**, and **ArgoCD**.
 
 ---
 
 ## 🏗️ Architecture: The Automated Lifecycle
-This project is engineered to follow a complete **Build → Deploy → Observe → Destroy** cycle, maximizing efficiency and minimizing costs.
+This project is engineered to follow a complete **Test → Build → Push → Deploy → Observe → Destroy** cycle, maximizing efficiency and minimizing costs.
+
 
 ### 🔄 The Workflow Logic
 ```mermaid
-graph LR
+graph TD
     A[Code Push] --> B[CI: Test & Security]
     B --> C[Push Docker Image]
     C --> D[CD: IaC Provisioning]

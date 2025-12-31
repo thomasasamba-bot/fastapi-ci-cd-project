@@ -161,6 +161,9 @@ locals {
         automated:
           prune: true
           selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        - ApplyOutOfSyncOnly=true
     EOF
 
     # Apply the Monitoring Application manifest
@@ -186,6 +189,7 @@ locals {
           allowEmpty: true
         syncOptions:
         - CreateNamespace=true
+        - ApplyOutOfSyncOnly=true
     EOF
   EOT
 }

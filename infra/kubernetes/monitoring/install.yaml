@@ -2,11 +2,6 @@
 # It creates a single Prometheus pod and a single Grafana pod with minimal memory limits.
 # In a real production environment, use the kube-prometheus-stack Helm chart.
 
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: monitoring
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:

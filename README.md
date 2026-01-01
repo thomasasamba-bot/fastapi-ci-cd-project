@@ -72,8 +72,8 @@ I've implemented a custom **S3-based credential sync**. This allows you to secur
 
 ### Local Development
 1. Clone the repository.
-2. Install dependencies: `pip install -r requirements.txt`.
-3. Use the **Makefile** for common tasks:
+2. Use the **Makefile** for common tasks:
+   - `make install`: Install dependencies (Prerequisite).
    - `make local`: Run the app locally.
    - `make test`: Run unit tests.
    - `make build`: Build Docker image locally.

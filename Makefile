@@ -1,23 +1,31 @@
 # Makefile for FastAPI CI/CD Showcase
 
-.PHONY: help test local setup-kube build
+.PHONY: help install test local setup-kube build
+
+VENV = .venv
+PYTHON = $(VENV)/bin/python
+PIP = $(VENV)/bin/pip
+UVICORN = $(VENV)/bin/uvicorn
+PYTEST = $(VENV)/bin/pytest
 
 help:
 	@echo "Available commands:"
-	@echo "  make install     - Install python dependencies"
-	@echo "  make test        - Run python tests"
-	@echo "  make local       - Run FastAPI app locally"
+	@echo "  make install     - Create .venv and install dependencies"
+	@echo "  make test        - Run python tests using .venv"
+	@echo "  make local       - Run FastAPI app locally using .venv"
 	@echo "  make setup-kube  - Sync cluster credentials (requires IP and BUCKET)"
 	@echo "  make build       - Build docker image locally"
 
 install:
-	pip install -r requirements.txt
+	python3 -m venv $(VENV)
+	$(PIP) install --upgrade pip
+	$(PIP) install -r requirements.txt
 
 test:
-	pytest app/tests/
+	$(PYTEST) app/tests/
 
 local:
-	uvicorn app.src.routes.main:app --reload --port 8000
+	$(UVICORN) app.src.routes.main:app --reload --port 8000
 
 setup-kube:
 	@if [ -z "$(IP)" ] || [ -z "$(BUCKET)" ]; then \

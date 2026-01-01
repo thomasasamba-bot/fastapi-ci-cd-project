@@ -64,6 +64,25 @@ I've implemented a custom **S3-based credential sync**. This allows you to secur
 
 ---
 
+## 💻 Setup & Usage
+
+### Prerequisites
+- AWS Account & Credentials.
+- GitHub Account with secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `DOCKER_USERNAME`, `DOCKERHUB_TOKEN`, `TF_STATE_BUCKET`.
+
+### Local Development
+1. Clone the repository.
+2. Install dependencies: `pip install -r requirements.txt`.
+3. Use the **Makefile** for common tasks:
+   - `make local`: Run the app locally.
+   - `make test`: Run unit tests.
+   - `make build`: Build Docker image locally.
+
+### Triggering Deployment
+Simply push your changes to the `main` branch. The GitHub Actions pipeline will build the image, provision AWS infra via Terraform, and sync the app via ArgoCD automatically.
+
+---
+
 ## 📈 Portfolio Objectives
 This project serves as a definitive case study in:
 - **Automation at Scale**: Reducing manual intervention to near-zero.

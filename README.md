@@ -78,14 +78,24 @@ make local
 Trigger the CI/CD pipeline by pushing to the `main` branch. 
 The system automates the entire lifecycle:
 1.  **CI**: Builds & Tests (GitHub Actions).
-2.  **CD**: Provisioning (Terraform) & Deployment (ArgoCD).
+2.  **CD**: Provisioning (Terraform)### 2. Verify Deployment & Observability
+Once the CD pipeline finishes:
 
-**How to verify the app is running:**
-Wait ~5-10 minutes for the pipeline to finish, then run:
-```bash
-make status
-```
-This will output the **Public IP** of your server. Visit `http://<PUBLIC_IP>` to see the app.
+1.  **Get the App URL**:
+    ```bash
+    make status
+    # Output: 3.235.xxx.xxx
+    ```
+2.  **Visit the App**: Open `http://<PUBLIC_IP>` in your browser. You will see the **DevOps Dashboard** with links to Swagger Docs, Grafana, and Prometheus.
+3.  **Run Load Test** (To populate graphs):
+    ```bash
+    make install           # Install Locust
+    make load-test IP=http://<PUBLIC_IP>
+    ```
+    - This opens Locust at `http://localhost:8089`.
+    - Start a test with 50 users / 5 spawn rate.
+    - Go to **Grafana** (link on App homepage) -> **Dashboards** -> **FastAPI Performance**.
+    - Watch the real-time metrics (Requests/sec, Latency) update automatically!
 
 ### 3. Automated Lifecycle & Cleanup
 To ensure cost efficiency, this project creates ephemeral environments:

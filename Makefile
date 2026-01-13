@@ -55,6 +55,6 @@ load-test:
 		echo "Usage: make load-test IP=http://<PUBLIC_IP>"; \
 		exit 1; \
 	fi
-	./venv/bin/locust -f locustfile.py --host $(IP)
+	$(VENV)/bin/locust -f locustfile.py --host $(IP)
 
 

@@ -25,6 +25,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Bootstrap Terraform State Bucket
+        run: |
+          BUCKET_NAME="${{ secrets.TF_STATE_BUCKET }}"
+          echo "Checking if S3 bucket '$BUCKET_NAME' exists..."
+          if ! aws s3 ls "s3://$BUCKET_NAME" 2>&1 > /dev/null; then
+            echo "Bucket does not exist. Creating..."
+            aws s3 mb "s3://$BUCKET_NAME" --region us-east-1
+            aws s3api put-bucket-versioning --bucket "$BUCKET_NAME" --versioning-configuration Status=Enabled
+            echo "Bucket created and versioning enabled."
+          else
+            echo "Bucket already exists."
+          fi
+
       - name: Setup Terraform CLI
         uses: hashicorp/setup-terraform@v2
         with:

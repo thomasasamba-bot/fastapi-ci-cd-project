@@ -103,7 +103,7 @@ To ensure cost efficiency, this project creates ephemeral environments:
 │   ├── Dockerfile        # Container definition
 │   └── tests/            # Pytest suite
 ├── infra/
-│   ├── terraform/k3s/    # Terraform IaC for AWS & K3s
+│   ├── terraform/kubernetes/ # Terraform IaC for AWS & Kubernetes
 │   └── kubernetes/       # K8s manifests (Deployment, Ingress)
 ├── .github/workflows/    # CI/CD Pipelines (CI, CD, Destroy)
 └── Makefile              # Developer convenience scripts

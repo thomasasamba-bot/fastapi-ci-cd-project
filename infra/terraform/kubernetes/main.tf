@@ -53,9 +53,9 @@ data "aws_ami" "ubuntu" {
 # ---------------------------------------------------------------------------------------------------------------------
 # SECURITY GROUPS
 # ---------------------------------------------------------------------------------------------------------------------
-resource "aws_security_group" "k3s_node" {
-  name        = "${var.project_name}-k3s-sg"
-  description = "Security group for K3s node"
+resource "aws_security_group" "cluster_node" {
+  name        = "${var.project_name}-cluster-sg"
+  description = "Security group for Kubernetes node"
   vpc_id      = data.aws_vpc.default.id
 
   # SSH Access
@@ -113,16 +113,16 @@ locals {
     apt-get update && apt-get upgrade -y
     apt-get install -y curl jq
     
-    # Detect Public IP for K3s SSL
+    # Detect Public IP for Kubernetes SSL
     PUBLIC_IP=$(curl -s ifconfig.me)
-    echo "Public IP detected for K3s: $PUBLIC_IP"
+    echo "Public IP detected for Cluster: $PUBLIC_IP"
 
     # Install K3s with TLS SAN
     curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644 --tls-san $PUBLIC_IP
     export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
     # Prepare and Upload kubeconfig for remote access (Early)
-    # Detect Public IP for K3s SSL
+    # Detect Public IP for Kubernetes SSL
     PUBLIC_IP=$(curl -s ifconfig.me)
     cp /etc/rancher/k3s/k3s.yaml /tmp/kubeconfig
     sed -i "s/127.0.0.1/$PUBLIC_IP/g" /tmp/kubeconfig
@@ -194,14 +194,14 @@ locals {
   EOT
 }
 
-resource "aws_instance" "k3s_node" {
+resource "aws_instance" "cluster_node" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
 
   subnet_id                   = data.aws_subnets.default.ids[0]
-  vpc_security_group_ids      = [aws_security_group.k3s_node.id]
+  vpc_security_group_ids      = [aws_security_group.cluster_node.id]
   associate_public_ip_address = true
-  iam_instance_profile        = aws_iam_instance_profile.k3s_node_profile.name
+  iam_instance_profile        = aws_iam_instance_profile.cluster_node_profile.name
 
   user_data = base64encode(local.user_data)
   
@@ -211,7 +211,7 @@ resource "aws_instance" "k3s_node" {
   }
 
   tags = {
-    Name        = "${var.project_name}-k3s-node"
+    Name        = "${var.project_name}-cluster-node"
     Environment = var.environment
   }
 }
@@ -219,8 +219,8 @@ resource "aws_instance" "k3s_node" {
 # ---------------------------------------------------------------------------------------------------------------------
 # IAM ROLE
 # ---------------------------------------------------------------------------------------------------------------------
-resource "aws_iam_role" "k3s_node_role" {
-  name = "${var.project_name}-k3s-role"
+resource "aws_iam_role" "cluster_node_role" {
+  name = "${var.project_name}-cluster-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -237,18 +237,18 @@ resource "aws_iam_role" "k3s_node_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "ssm_policy" {
-  role       = aws_iam_role.k3s_node_role.name
+  role       = aws_iam_role.cluster_node_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-resource "aws_iam_instance_profile" "k3s_node_profile" {
-  name = "${var.project_name}-k3s-profile"
-  role = aws_iam_role.k3s_node_role.name
+resource "aws_iam_instance_profile" "cluster_node_profile" {
+  name = "${var.project_name}-cluster-profile"
+  role = aws_iam_role.cluster_node_role.name
 }
 
 resource "aws_iam_role_policy" "s3_access" {
   name = "${var.project_name}-s3-access"
-  role = aws_iam_role.k3s_node_role.id
+  role = aws_iam_role.cluster_node_role.id
 
   policy = jsonencode({
     Version = "2012-10-17"

@@ -43,7 +43,7 @@ status:
 	@echo "Checking AWS Project Status..."
 	@aws ec2 describe-instances \
 		--region us-east-1 \
-		--filters "Name=tag:Name,Values=*-k3s-node" "Name=instance-state-name,Values=running" \
+		--filters "Name=tag:Name,Values=*-cluster-node" "Name=instance-state-name,Values=running" \
 		--query "Reservations[*].Instances[*].PublicIpAddress" \
 		--output text
 

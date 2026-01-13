@@ -14,7 +14,9 @@ help:
 	@echo "  make test        - Run python tests using .venv"
 	@echo "  make local       - Run FastAPI app locally using .venv"
 	@echo "  make setup-kube  - Sync cluster credentials (requires IP and BUCKET)"
+	@echo "  make setup-kube  - Sync cluster credentials (requires IP and BUCKET)"
 	@echo "  make build       - Build docker image locally"
+	@echo "  make status      - Check if the App is running (Get Public IP)"
 
 install:
 	python3 -m venv $(VENV)
@@ -36,3 +38,12 @@ setup-kube:
 
 build:
 	docker build -t fastapi-app:local -f app/Dockerfile .
+
+status:
+	@echo "Checking AWS Project Status..."
+	@aws ec2 describe-instances \
+		--region us-east-1 \
+		--filters "Name=tag:Name,Values=*-k3s-node" "Name=instance-state-name,Values=running" \
+		--query "Reservations[*].Instances[*].PublicIpAddress" \
+		--output text
+

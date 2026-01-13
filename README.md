@@ -22,7 +22,7 @@ graph LR
     CD --> K8s[Bootstrap K3s Cluster]
     K8s --> Argo[ArgoCD Sync]
     Argo --> App[Deploy Microservices]
-    App --> Obs[Prometheus/Grafana]
+    App --> Obs[Monitoring:Prometheus/Grafana]
 ```
 
 ### Key Engineering Highlights
@@ -75,16 +75,23 @@ make local
 ```
 
 ### 2. Deployment (The Magic ✨)
-Simply push a commit to the `main` branch.
-1. **CI Pipeline**: Runs tests and creates the Docker image.
-2. **CD Pipeline**:
-    - Provisions AWS EC2 instance.
-    - Installs K3s & ArgoCD via `user_data`.
-    - Deploys the App and Monitoring stack.
-3. **Result**: Your app is live at the EC2 Public IP!
+Trigger the CI/CD pipeline by pushing to the `main` branch. 
+The system automates the entire lifecycle:
+1.  **CI**: Builds & Tests (GitHub Actions).
+2.  **CD**: Provisioning (Terraform) & Deployment (ArgoCD).
 
-### 3. Cleanup
-To destroy all resources and stop billing, manually trigger the **Destroy Infrastructure** workflow in GitHub Actions.
+**How to verify the app is running:**
+Wait ~5-10 minutes for the pipeline to finish, then run:
+```bash
+make status
+```
+This will output the **Public IP** of your server. Visit `http://<PUBLIC_IP>` to see the app.
+
+### 3. Automated Lifecycle & Cleanup
+To ensure cost efficiency, this project creates ephemeral environments:
+- **Auto-Destroy**: A timer is set for **10 minutes** after deployment. If no confirmation action is taken, the `destroy` job automatically triggers to tear down EC2/VPC resources.
+- **Manual Destroy**: You can run the "Destroy Infrastructure" workflow manually at any time.
+- **Full Cleanup**: The destroy logic includes deleting the Terraform State S3 bucket to leave *zero footprint* on AWS.
 
 ---
 

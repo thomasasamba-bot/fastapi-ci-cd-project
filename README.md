@@ -89,7 +89,7 @@ This will output the **Public IP** of your server. Visit `http://<PUBLIC_IP>` to
 
 ### 3. Automated Lifecycle & Cleanup
 To ensure cost efficiency, this project creates ephemeral environments:
-- **Auto-Destroy**: A timer is set for **10 minutes** after deployment. If no confirmation action is taken, the `destroy` job automatically triggers to tear down EC2/VPC resources.
+- **Auto-Destroy**: A timer is set for **30 minutes** after deployment. If no confirmation action is taken, the `destroy` job automatically triggers to tear down EC2/VPC resources.
 - **Manual Destroy**: You can run the "Destroy Infrastructure" workflow manually at any time.
 - **Full Cleanup**: The destroy logic includes deleting the Terraform State S3 bucket to leave *zero footprint* on AWS.
 

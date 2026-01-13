@@ -103,9 +103,9 @@ jobs:
           EOF
           terraform init -backend-config=backend.tfbackend
 
-      - name: Terraform Destroy (Delayed 10m)
+      - name: Terraform Destroy (Delayed 30m)
         working-directory: infra/terraform/kubernetes
         run: |
-          echo "Waiting 10 minutes before destroying resources to allow for verification..."
-          sleep 600
+          echo "Waiting 30 minutes before destroying resources to allow for verification..."
+          sleep 1800
           terraform destroy -var="tf_state_bucket=${{ secrets.TF_STATE_BUCKET }}" -auto-approve

@@ -37,7 +37,7 @@ setup-kube:
 		echo "Usage: make setup-kube IP=<PUBLIC_IP> BUCKET=<S3_BUCKET>"; \
 		exit 1; \
 	fi
-	./setup-kube.sh $(IP) $(BUCKET)
+	scripts/setup-kube.sh $(IP) $(BUCKET)
 
 build:
 	docker build -t fastapi-app:local -f app/Dockerfile .
@@ -55,6 +55,6 @@ load-test:
 		echo "Usage: make load-test IP=http://<PUBLIC_IP>"; \
 		exit 1; \
 	fi
-	$(VENV)/bin/locust -f locustfile.py --host $(IP)
+	$(VENV)/bin/locust -f app/tests/load/locustfile.py --host $(IP)
 
 

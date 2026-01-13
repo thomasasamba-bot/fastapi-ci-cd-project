@@ -16,7 +16,10 @@ help:
 	@echo "  make setup-kube  - Sync cluster credentials (requires IP and BUCKET)"
 	@echo "  make setup-kube  - Sync cluster credentials (requires IP and BUCKET)"
 	@echo "  make build       - Build docker image locally"
+	@echo "  make setup-kube  - Sync cluster credentials (requires IP and BUCKET)"
+	@echo "  make build       - Build docker image locally"
 	@echo "  make status      - Check if the App is running (Get Public IP)"
+	@echo "  make load-test   - Run Locust load test (requires IP=<HOST_URL>)"
 
 install:
 	python3 -m venv $(VENV)
@@ -46,4 +49,12 @@ status:
 		--filters "Name=tag:Name,Values=*-cluster-node" "Name=instance-state-name,Values=running" \
 		--query "Reservations[*].Instances[*].PublicIpAddress" \
 		--output text
+
+load-test:
+	@if [ -z "$(IP)" ]; then \
+		echo "Usage: make load-test IP=http://<PUBLIC_IP>"; \
+		exit 1; \
+	fi
+	locust -f locustfile.py --host $(IP)
+
 

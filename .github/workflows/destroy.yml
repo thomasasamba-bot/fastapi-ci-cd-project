@@ -21,7 +21,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
 
       - name: Terraform Init
-        working-directory: infra/terraform/eks
+        working-directory: infra/terraform/k3s
         run: |
           cat <<EOF > backend.tfbackend
           bucket = "${{ secrets.TF_STATE_BUCKET }}"
@@ -31,5 +31,5 @@ jobs:
           terraform init -backend-config=backend.tfbackend
 
       - name: Terraform Destroy
-        working-directory: infra/terraform/eks
+        working-directory: infra/terraform/k3s
         run: terraform destroy -var="tf_state_bucket=${{ secrets.TF_STATE_BUCKET }}" -auto-approve

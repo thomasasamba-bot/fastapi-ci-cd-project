@@ -1,94 +1,107 @@
-# 🚀 Zero-Touch DevOps: End-to-End CI/CD + Security + GitOps in Action
+# 🚀 Zero-Touch DevOps: End-to-End CI/CD + GitOps Platform
 
-An industry-leading demonstration of a **Fully Automated Cloud-Native CI/CD + Security + GitOps workflow**. This project transforms a simple FastAPI application into a robust, secure, and self-healing system deployed on AWS using **Terraform**, **Kubernetes (K3s)**, and **ArgoCD**.
+[![CI Pipeline](https://github.com/thomasasamba-bot/fastapi-ci-cd-project/actions/workflows/ci.yaml/badge.svg)](https://github.com/thomasasamba-bot/fastapi-ci-cd-project/actions/workflows/ci.yaml)
+[![CD Pipeline](https://github.com/thomasasamba-bot/fastapi-ci-cd-project/actions/workflows/cd.yml/badge.svg)](https://github.com/thomasasamba-bot/fastapi-ci-cd-project/actions/workflows/cd.yml)
+[![Terraform](https://img.shields.io/badge/Terraform-1.5.0-purple?logo=terraform)](https://www.terraform.io/)
+[![Kubernetes](https://img.shields.io/badge/K3s-Lightweight-blue?logo=kubernetes)](https://k3s.io/)
+[![ArgoCD](https://img.shields.io/badge/GitOps-ArgoCD-orange?logo=argo)](https://argoproj.github.io/argo-cd/)
+
+A production-grade, fully automated **DevSecOps Platform** demonstrating the power of **GitOps**, **Infrastructure as Code**, and **Self-Healing Systems**. This project bootstraps a complete Kubernetes environment on AWS from scratch, deploys a secure FastAPI microservice, and manages its entire lifecycle automatically.
 
 ---
 
-## 🏗️ Architecture: The Automated Lifecycle
-This project is engineered to follow a complete **Test → Build → Push → Deploy → Observe → Destroy** cycle, maximizing efficiency and minimizing costs.
+## 🏗️ Architecture & Workflow
 
+This project implements a "Zero-Touch" philosophy: developers just push code, and the platform handles the rest.
 
-### 🔄 The Workflow Logic
 ```mermaid
-graph TD
-    A[Code Push] --> B[CI: Test & Security]
-    B --> C[Push Docker Image]
-    C --> D[CD: IaC Provisioning]
-    D --> E[K3s & ArgoCD Bootstrap]
-    E --> F[GitOps: App Deployment]
-    F --> G[Observability: Prom/Grafana]
-    G --> H[10min Verification Window]
-    H --> I[Automated AWS Cleanup]
+graph LR
+    Push[Code Push] --> CI[CI: Test & Scan]
+    CI --> Build[Build & Push Image]
+    Build --> CD[CD: Terraform Provision]
+    CD --> K8s[Bootstrap K3s Cluster]
+    K8s --> Argo[ArgoCD Sync]
+    Argo --> App[Deploy Microservices]
+    App --> Obs[Prometheus/Grafana]
+```
+
+### Key Engineering Highlights
+- **Ephemeral Infrastructure**: The entire cloud environment (EC2, VPC, IAM) is provisioned on-demand via **Terraform**.
+- **True GitOps**: **ArgoCD** ensures the cluster state *always* matches the Git repository. Manual changes are automatically reverted.
+- **Security First**: Integrated vulnerability scanning (**Trivy**), linting (**Flake8**), and SAST (**Bandit**) in the pipeline.
+- **Cost efficient**: Automatic teardown capabilities to prevent zombie resources.
+
+---
+
+## 🛠️ Technology Stack
+
+| Domain | Technology | Usage |
+|:---|:---|:---|
+| **Cloud Provider** | AWS (EC2, S3, IAM) | Underlying infrastructure |
+| **IaC** | Terraform | automated infrastructure provisioning |
+| **Orchestration** | K3s (Kubernetes) | Lightweight, production-ready cluster |
+| **GitOps** | ArgoCD | Continuous Deployment & State Synchronization |
+| **CI/CD** | GitHub Actions | Pipeline automation (Build, Test, Deploy, Destroy) |
+| **Backend** | FastAPI (Python) | High-performance microservice |
+| **Observability** | Prometheus & Grafana | Real-time metrics and dashboards |
+| **Networking** | Traefik | Ingress controller for routing |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- AWS Account & Credentials
+- GitHub Repository with Secrets configured:
+  - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+  - `DOCKER_USERNAME`, `DOCKERHUB_TOKEN`
+  - `TF_STATE_BUCKET` (S3 Bucket for Terraform state)
+
+### 1. Local Development
+Clone the repository and verify the app locally using the `Makefile`:
+
+```bash
+# Install dependencies
+make install
+
+# Run tests
+make test
+
+# Build Docker image
+make build
+
+# Run locally
+make local
+```
+
+### 2. Deployment (The Magic ✨)
+Simply push a commit to the `main` branch.
+1. **CI Pipeline**: Runs tests and creates the Docker image.
+2. **CD Pipeline**:
+    - Provisions AWS EC2 instance.
+    - Installs K3s & ArgoCD via `user_data`.
+    - Deploys the App and Monitoring stack.
+3. **Result**: Your app is live at the EC2 Public IP!
+
+### 3. Cleanup
+To destroy all resources and stop billing, manually trigger the **Destroy Infrastructure** workflow in GitHub Actions.
+
+---
+
+## 📂 Project Structure
+
+```
+├── app/                  # FastAPI Application source code
+│   ├── src/              # Application logic
+│   ├── Dockerfile        # Container definition
+│   └── tests/            # Pytest suite
+├── infra/
+│   ├── terraform/k3s/    # Terraform IaC for AWS & K3s
+│   └── kubernetes/       # K8s manifests (Deployment, Ingress)
+├── .github/workflows/    # CI/CD Pipelines (CI, CD, Destroy)
+└── Makefile              # Developer convenience scripts
 ```
 
 ---
 
-## 🛠️ Tech Stack & Engineering Highlights
-
-### 1. **Infrastructure as Code (IaC)**
-*   **Terraform**: Automated provisioning of AWS EC2 (`m7i-flex.large`), VPC components, and IAM roles.
-*   **State Management**: Secure S3 remote backend with state locking.
-*   **Cloud-Native Bootstrapping**: EC2 `user_data` script handles OS hardening, K3s installation, and ArgoCD orchestration.
-
-### 2. **GitOps & Kubernetes**
-*   **ArgoCD**: Implements the "Source of Truth" pattern. Any manual change to the cluster is automatically corrected to match the Git repository.
-*   **K3s**: High-performance, lightweight Kubernetes distribution tailored for cloud efficiency.
-*   **Ingress Routing**: Specialized **Traefik** configuration enables path-based routing for the App, Prometheus, and Grafana under a single Public IP.
-
-### 3. **Production CI/CD Pipelines**
-*   **Continuous Integration**: Parallelized jobs for **Pytest**, **Flake8** (linting), **Bandit** (Sast), and **Trivy** (vulnerability scanning).
-*   **Continuous Deployment**: Automated synchronization of Kubernetes manifests and Terraform lifecycle management.
-*   **Lifecycle Awareness**: Includes an automated `cleanup` job that triggers `terraform destroy` after a 10-minute verification window.
-
-### 4. **Modern Observability**
-*   **Prometheus**: Real-time metrics collection from the FastAPI `/metrics` endpoint.
-*   **Grafana**: Pre-configured visualization dashboards for cluster and application health.
-*   **Integrated Hub**: The application home page serves as a central hub with direct links to all monitoring tools.
-
----
-
-## 🔍 Access & Exploration Guide
-
-### **1. Web Dashboards (Zero-Config)**
-Once the deployment job in GitHub Actions turns green, access everything via your **Public IP**:
-*   **🚀 FastAPI App**: `http://<PUBLIC_IP>/` (Central Hub)
-*   **📊 Prometheus**: `http://<PUBLIC_IP>/prometheus`
-*   **📈 Grafana**: `http://<PUBLIC_IP>/grafana` (admin/admin)
-*   **📖 API Docs**: `http://<PUBLIC_IP>/docs`
-
-### **2. Developer CLI (Zero-SSH Sync)**
-I've implemented a custom **S3-based credential sync**. This allows you to securely link your local `kubectl` to the AWS cluster without needing SSH keys.
-1.  **Run**: `chmod +x setup-kube.sh`
-2.  **Run**: `./setup-kube.sh <PUBLIC_IP> <TF_STATE_BUCKET_NAME>`
-3.  **Verify**: `kubectl get pods -A`
-
----
-
-## 💻 Setup & Usage
-
-### Prerequisites
-- AWS Account & Credentials.
-- GitHub Account with secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `DOCKER_USERNAME`, `DOCKERHUB_TOKEN`, `TF_STATE_BUCKET`.
-
-### Local Development
-1. Clone the repository.
-2. Use the **Makefile** for common tasks:
-   - `make install`: Install dependencies (Prerequisite).
-   - `make local`: Run the app locally.
-   - `make test`: Run unit tests.
-   - `make build`: Build Docker image locally.
-
-### Triggering Deployment
-Simply push your changes to the `main` branch. The GitHub Actions pipeline will build the image, provision AWS infra via Terraform, and sync the app via ArgoCD automatically.
-
----
-
-## 📈 Portfolio Objectives
-This project serves as a definitive case study in:
-- **Automation at Scale**: Reducing manual intervention to near-zero.
-- **Cost Efficiency**: Ephemeral infrastructure management on AWS.
-- **Security-First Culture**: Integrating security scans at every stage of the pipeline.
-- **Unified Observability**: Making system health visible and actionable.
-
----
-*Developed with ⚖️ by [Thomas Asamba](https://github.com/thomasasamba-bot)*
+*This project is part of a Cloud Engineering Portfolio demonstrating advanced automation patterns.*

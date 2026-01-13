@@ -31,7 +31,7 @@ jobs:
           terraform_version: "1.5.0"
 
       - name: Terraform Initialize
-        working-directory: infra/terraform/eks
+        working-directory: infra/terraform/k3s
         run: |
           cat <<EOF > backend.tfbackend
           bucket = "${{ secrets.TF_STATE_BUCKET }}"
@@ -41,7 +41,7 @@ jobs:
           terraform init -backend-config=backend.tfbackend
 
       - name: Terraform Apply Infrastructure
-        working-directory: infra/terraform/eks
+        working-directory: infra/terraform/k3s
         run: terraform apply -var="tf_state_bucket=${{ secrets.TF_STATE_BUCKET }}" -auto-approve
 
       - name: Deploy Application (Update GitOps Manifests)
@@ -81,7 +81,7 @@ jobs:
           terraform_version: "1.5.0"
 
       - name: Terraform Initialize
-        working-directory: infra/terraform/eks
+        working-directory: infra/terraform/k3s
         run: |
           cat <<EOF > backend.tfbackend
           bucket = "${{ secrets.TF_STATE_BUCKET }}"
@@ -91,7 +91,7 @@ jobs:
           terraform init -backend-config=backend.tfbackend
 
       - name: Terraform Destroy (Delayed 10m)
-        working-directory: infra/terraform/eks
+        working-directory: infra/terraform/k3s
         run: |
           echo "Waiting 10 minutes before destroying resources to allow for verification..."
           sleep 600
